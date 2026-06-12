@@ -78,10 +78,10 @@ if question := st.chat_input("Ask an HR question..."):
             answer, docs = ask_bot(question)
         st.markdown(answer)
         if docs:
-            with st.expander("📄 Sources"):
-                for i, doc in enumerate(docs, 1):
-                    source = doc.metadata.get("source", "Unknown")
-                    page = doc.metadata.get("page", "?")
-                    st.markdown(f"**Source {i}:** {os.path.basename(source)} — Page {page}")
-                    st.caption(doc.page_content[:200] + "...")
+    with st.expander("📄 Sources"):
+        for i, doc in enumerate(docs, 1):
+            source = doc.metadata.get("source", "Unknown") if hasattr(doc, "metadata") else "Unknown"
+            page = doc.metadata.get("page", "?") if hasattr(doc, "metadata") else "?"
+            st.markdown(f"**Source {i}:** {os.path.basename(str(source))} — Page {page}")
+            st.caption(str(doc.page_content)[:200] + "...")
     st.session_state.messages.append({"role": "assistant", "content": answer})
