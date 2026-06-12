@@ -1,8 +1,4 @@
-# TODO: Build your Streamlit chatbot application
-
 import streamlit as st
-
-# your code here
 import os
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -19,7 +15,6 @@ st.set_page_config(
     page_icon="🤖",
     layout="centered"
 )
-
 st.title("🤖 Zyro Dynamics HR Help Desk")
 st.caption("Ask me anything about HR policies!")
 
@@ -75,13 +70,18 @@ if question := st.chat_input("Ask an HR question..."):
         st.markdown(question)
     with st.chat_message("assistant"):
         with st.spinner("Searching HR policies..."):
-            answer, docs = ask_bot(question)
+            result = ask_bot(question)
+        answer = result["answer"]
+        docs = result["sources"]
         st.markdown(answer)
         if docs:
-    with st.expander("📄 Sources"):
-        for i, doc in enumerate(docs, 1):
-            source = doc.metadata.get("source", "Unknown") if hasattr(doc, "metadata") else "Unknown"
-            page = doc.metadata.get("page", "?") if hasattr(doc, "metadata") else "?"
-            st.markdown(f"**Source {i}:** {os.path.basename(str(source))} — Page {page}")
-            st.caption(str(doc.page_content)[:200] + "...")
+            with st.expander("📄 Sources"):
+                for i, doc in enumerate(docs, 1):
+                    try:
+                        source = doc.metadata.get("source", "Unknown")
+                        page = doc.metadata.get("page", "?")
+                        st.markdown(f"**Source {i}:** {os.path.basename(str(source))} — Page {page}")
+                        st.caption(str(doc.page_content)[:200] + "...")
+                    except Exception:
+                        st.caption(f"Source {i}: unavailable")
     st.session_state.messages.append({"role": "assistant", "content": answer})
